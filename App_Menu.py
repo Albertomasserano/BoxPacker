@@ -1,6 +1,7 @@
 import streamlit as st
 import plotly.graph_objects as go
 import math
+import random
 
 # --- Konfiguration ---
 KISTE = (567, 366, 315)
@@ -104,7 +105,7 @@ def zeichne_kiste_plotly(cfg, ring_name=""):
             flatshading=True,
             showscale=False
         ))
-        # Bordi
+        # Bordi neri
         edges = [
             (0,1), (1,2), (2,3), (3,0),
             (4,5), (5,6), (6,7), (7,4),
@@ -120,20 +121,21 @@ def zeichne_kiste_plotly(cfg, ring_name=""):
                 showlegend=False
             ))
 
-    # Ringe (pezzi)
+    # Box esterno blu trasparente
+    crea_cubo(0, 0, 0, inner_L, inner_B, H_tot, color='blue', opacity=0.1)
+
+    # Ringe (pezzi), ciascuno con colore diverso
     for i in range(nx):
         for j in range(ny):
             x0 = i * (dx + ABSTAND)
             y0 = j * (dy + ABSTAND)
             z0 = 0
-            crea_cubo(x0, y0, z0, dx, dy, dz, color='blue', opacity=0.6)
+            color = f"rgb({random.randint(50,255)}, {random.randint(50,255)}, {random.randint(50,255)})"
+            crea_cubo(x0, y0, z0, dx, dy, dz, color=color, opacity=0.8)
 
-    # Cassetta principale
-    crea_cubo(0, 0, 0, inner_L, inner_B, inner_H, color='gray', opacity=0.1)
-
-    # Estensione se necessaria
+    # Estensione extra visibile in grigio
     if uses_ext:
-        crea_cubo(0, 0, inner_H, inner_L, inner_B, EXT_HEIGHT, color='lightgray', opacity=0.2)
+        crea_cubo(0, 0, inner_H, inner_L, inner_B, EXT_HEIGHT, color='lightgray', opacity=0.3)
 
     fig.update_layout(
         scene=dict(
