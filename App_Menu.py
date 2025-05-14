@@ -83,7 +83,7 @@ def zeichne_kiste_plotly(cfg, ring_name=""):
 
     fig = go.Figure()
 
-    def crea_cubo(x0, y0, z0, dx, dy, dz, color, opacity):
+    def crea_cubo(x0, y0, z0, dx, dy, dz, color, opacity, name=None, showlegend=True):
         x1, y1, z1 = x0 + dx, y0 + dy, z0 + dz
         X = [x0,x1,x1,x0,x0,x1,x1,x0]
         Y = [y0,y0,y1,y1,y0,y0,y1,y1]
@@ -103,9 +103,12 @@ def zeichne_kiste_plotly(cfg, ring_name=""):
             opacity=opacity,
             color=color,
             flatshading=True,
-            showscale=False
+            showscale=False,
+            name=name if name else "",
+            legendgroup=name,
+            showlegend=showlegend
         ))
-        # Bordi neri
+        # Bordi
         edges = [
             (0,1), (1,2), (2,3), (3,0),
             (4,5), (5,6), (6,7), (7,4),
@@ -121,21 +124,23 @@ def zeichne_kiste_plotly(cfg, ring_name=""):
                 showlegend=False
             ))
 
-    # Box esterno blu trasparente
-    crea_cubo(0, 0, 0, inner_L, inner_B, H_tot, color='blue', opacity=0.1)
+    # Box blu trasparente
+    crea_cubo(0, 0, 0, inner_L, inner_B, H_tot, color='blue', opacity=0.1, name="Cassetta", showlegend=True)
 
-    # Ringe (pezzi), ciascuno con colore diverso
+    # Ringe (pezzi) opachi e con legenda
+    count = 1
     for i in range(nx):
         for j in range(ny):
             x0 = i * (dx + ABSTAND)
             y0 = j * (dy + ABSTAND)
             z0 = 0
             color = f"rgb({random.randint(50,255)}, {random.randint(50,255)}, {random.randint(50,255)})"
-            crea_cubo(x0, y0, z0, dx, dy, dz, color=color, opacity=0.8)
+            crea_cubo(x0, y0, z0, dx, dy, dz, color=color, opacity=1, name=f"Ring {count}")
+            count += 1
 
-    # Estensione extra visibile in grigio
+    # Estensione grigia trasparente
     if uses_ext:
-        crea_cubo(0, 0, inner_H, inner_L, inner_B, EXT_HEIGHT, color='lightgray', opacity=0.3)
+        crea_cubo(0, 0, inner_H, inner_L, inner_B, EXT_HEIGHT, color='lightgray', opacity=0.3, name="Estensione")
 
     fig.update_layout(
         scene=dict(
@@ -145,7 +150,8 @@ def zeichne_kiste_plotly(cfg, ring_name=""):
             aspectmode='data'
         ),
         margin=dict(l=0, r=0, b=0, t=30),
-        title=dict(text=ring_name, x=0.5)
+        title=dict(text=ring_name, x=0.5),
+        legend=dict(x=0.85, y=0.95)
     )
     return fig
 
