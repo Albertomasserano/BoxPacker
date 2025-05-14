@@ -181,7 +181,7 @@ if ring:
         f"Durchmesser: **{dx:.1f} mm**, Dicke: **{dz:.1f} mm**  \n"
         f"Reihen: X = **{nx}**, Y = **{ny}**  \n"
         f"**{gesamt} Ringe insgesamt**  \n"
-        f"Kurztrenner: **{sep_kurz}**, Langtrenner: **{sep_lang}**"
+        f"Kurztrenner: **{sep_lang}**, Langtrenner: **{sep_kurz}**"
     )
     st.markdown(titel)
 
