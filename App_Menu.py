@@ -83,7 +83,7 @@ def zeichne_kiste_plotly(cfg, ring_name=""):
 
     fig = go.Figure()
 
-    def crea_cubo(x0, y0, z0, dx, dy, dz, color, opacity, name=None, showlegend=True):
+    def crea_cubo(x0, y0, z0, dx, dy, dz, color, opacity, name=None, showlegend=False):
         x1, y1, z1 = x0 + dx, y0 + dy, z0 + dz
         X = [x0,x1,x1,x0,x0,x1,x1,x0]
         Y = [y0,y0,y1,y1,y0,y0,y1,y1]
@@ -108,7 +108,6 @@ def zeichne_kiste_plotly(cfg, ring_name=""):
             legendgroup=name,
             showlegend=showlegend
         ))
-        # Bordi
         edges = [
             (0,1), (1,2), (2,3), (3,0),
             (4,5), (5,6), (6,7), (7,4),
@@ -124,10 +123,10 @@ def zeichne_kiste_plotly(cfg, ring_name=""):
                 showlegend=False
             ))
 
-    # Box blu trasparente
+    # Box esterno blu
     crea_cubo(0, 0, 0, inner_L, inner_B, H_tot, color='blue', opacity=0.1, name="Cassetta", showlegend=True)
 
-    # Ringe (pezzi) opachi e con legenda
+    # Ringe
     count = 1
     for i in range(nx):
         for j in range(ny):
@@ -138,9 +137,9 @@ def zeichne_kiste_plotly(cfg, ring_name=""):
             crea_cubo(x0, y0, z0, dx, dy, dz, color=color, opacity=1, name=f"Ring {count}")
             count += 1
 
-    # Estensione grigia trasparente
+    # Estensione
     if uses_ext:
-        crea_cubo(0, 0, inner_H, inner_L, inner_B, EXT_HEIGHT, color='lightgray', opacity=0.3, name="Estensione")
+        crea_cubo(0, 0, inner_H, inner_L, inner_B, EXT_HEIGHT, color='lightgray', opacity=0.3, name="Estensione", showlegend=True)
 
     fig.update_layout(
         scene=dict(
@@ -166,6 +165,25 @@ if ring:
     d, h = RINGE_DATEN[ring]
     best_cfg = berechne_beste_konfiguration((d, d, h))
     fig = zeichne_kiste_plotly(best_cfg, ring)
+
+    # Calcola legenda testuale
+    nx, ny, _ = best_cfg['reihen']
+    dx, dy, dz = best_cfg['maße']
+    gesamt = best_cfg['gesamt']
+    sep_kurz = max(0, ny - 1)
+    sep_lang = max(0, nx - 1)
+    achse = best_cfg['achse']
+    axis_label = f"Ausrichtung: {'X' if achse == 'X' else 'Y'}-Achse"
+
+    titel = (
+        f"**{ring}**\n\n"
+        f"{axis_label}  \n"
+        f"Durchmesser: **{dx:.1f} mm**, Dicke: **{dz:.1f} mm**  \n"
+        f"Reihen: X = **{nx}**, Y = **{ny}**  \n"
+        f"**{gesamt} Ringe insgesamt**  \n"
+        f"Kurztrenner: **{sep_kurz}**, Langtrenner: **{sep_lang}**"
+    )
+    st.markdown(titel)
 
     if best_cfg['uses_ext']:
         st.info("⚠️ Zusätzliche Höhe wird benötigt (EXT_HEIGHT)!")
