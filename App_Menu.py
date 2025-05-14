@@ -50,18 +50,14 @@ def optimiere_achse(kiste, teil, rand, abstand, achse):
             continue
         elif achse == 'X':
             dx, dy, dz = ps, dims[0], dims[1]
-            uses_ext = dz > inner_H
-            H_tot = inner_H + (EXT_HEIGHT if uses_ext else 0)
         else:
             dx, dy, dz = dims[0], ps, dims[1]
-            uses_ext = dz > inner_H
-            H_tot = inner_H + (EXT_HEIGHT if uses_ext else 0)
-
+        uses_ext = dz > inner_H
+        H_tot = inner_H + (EXT_HEIGHT if uses_ext else 0)
         nx = math.floor((inner_L + abstand) / (dx + abstand))
         ny = math.floor((inner_B + abstand) / (dy + abstand))
         nz = 1
         total = nx * ny * nz
-
         if total > best['gesamt']:
             best = {
                 'maße': (dx, dy, dz),
@@ -83,44 +79,61 @@ def zeichne_kiste_plotly(cfg, ring_name=""):
     nx, ny, _ = cfg['reihen']
     uses_ext = cfg['uses_ext']
     H_tot = cfg['H_tot']
-    achse = cfg['achse']
 
     fig = go.Figure()
 
-    # Ringe
+    def crea_cubo(x0, y0, z0, dx, dy, dz, color, opacity):
+        x1, y1, z1 = x0 + dx, y0 + dy, z0 + dz
+        X = [x0,x1,x1,x0,x0,x1,x1,x0]
+        Y = [y0,y0,y1,y1,y0,y0,y1,y1]
+        Z = [z0,z0,z0,z0,z1,z1,z1,z1]
+        faces = [
+            (0,1,2), (0,2,3),
+            (4,5,6), (4,6,7),
+            (0,1,5), (0,5,4),
+            (1,2,6), (1,6,5),
+            (2,3,7), (2,7,6),
+            (3,0,4), (3,4,7)
+        ]
+        i_faces, j_faces, k_faces = zip(*faces)
+        fig.add_trace(go.Mesh3d(
+            x=X, y=Y, z=Z,
+            i=i_faces, j=j_faces, k=k_faces,
+            opacity=opacity,
+            color=color,
+            flatshading=True,
+            showscale=False
+        ))
+        # Bordi
+        edges = [
+            (0,1), (1,2), (2,3), (3,0),
+            (4,5), (5,6), (6,7), (7,4),
+            (0,4), (1,5), (2,6), (3,7)
+        ]
+        for e in edges:
+            fig.add_trace(go.Scatter3d(
+                x=[X[e[0]], X[e[1]]],
+                y=[Y[e[0]], Y[e[1]]],
+                z=[Z[e[0]], Z[e[1]]],
+                mode='lines',
+                line=dict(color='black', width=1),
+                showlegend=False
+            ))
+
+    # Ringe (pezzi)
     for i in range(nx):
         for j in range(ny):
             x0 = i * (dx + ABSTAND)
             y0 = j * (dy + ABSTAND)
-            fig.add_trace(go.Mesh3d(
-                x=[x0, x0+dx, x0+dx, x0, x0, x0+dx, x0+dx, x0],
-                y=[y0, y0, y0+dy, y0+dy, y0, y0, y0+dy, y0+dy],
-                z=[0, 0, 0, 0, dz, dz, dz, dz],
-                i=[0, 0, 0, 4, 4, 5],
-                j=[1, 2, 3, 5, 6, 6],
-                k=[2, 3, 1, 6, 7, 7],
-                opacity=0.6,
-                color='blue',
-                showscale=False
-            ))
+            z0 = 0
+            crea_cubo(x0, y0, z0, dx, dy, dz, color='blue', opacity=0.6)
 
-    # Cassetta
-    x0, y0, z0 = 0, 0, 0
-    x1, y1, z1 = inner_L, inner_B, inner_H
+    # Cassetta principale
+    crea_cubo(0, 0, 0, inner_L, inner_B, inner_H, color='gray', opacity=0.1)
+
+    # Estensione se necessaria
     if uses_ext:
-        z1 += EXT_HEIGHT
-
-    fig.add_trace(go.Mesh3d(
-        x=[x0,x1,x1,x0,x0,x1,x1,x0],
-        y=[y0,y0,y1,y1,y0,y0,y1,y1],
-        z=[z0,z0,z0,z0,z1,z1,z1,z1],
-        i=[0,0,0,4,4,5],
-        j=[1,2,3,5,6,6],
-        k=[2,3,1,6,7,7],
-        opacity=0.1,
-        color='gray',
-        showscale=False
-    ))
+        crea_cubo(0, 0, inner_H, inner_L, inner_B, EXT_HEIGHT, color='lightgray', opacity=0.2)
 
     fig.update_layout(
         scene=dict(
@@ -132,7 +145,6 @@ def zeichne_kiste_plotly(cfg, ring_name=""):
         margin=dict(l=0, r=0, b=0, t=30),
         title=dict(text=ring_name, x=0.5)
     )
-
     return fig
 
 # --- Streamlit UI ---
