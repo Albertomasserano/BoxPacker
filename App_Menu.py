@@ -170,8 +170,8 @@ if ring:
     nx, ny, _ = best_cfg['reihen']
     dx, dy, dz = best_cfg['maße']
     gesamt = best_cfg['gesamt']
-    sep_kurz = max(0, ny - 1)
-    sep_lang = max(0, nx - 1)
+    sep_kurz = max(0, ny + 1)
+    sep_lang = max(0, nx + 1)
     achse = best_cfg['achse']
     axis_label = f"Ausrichtung: {'X' if achse == 'X' else 'Y'}-Achse"
 
