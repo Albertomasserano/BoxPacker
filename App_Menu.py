@@ -124,7 +124,7 @@ def zeichne_kiste_plotly(cfg, ring_name=""):
             ))
 
     # Box esterno blu
-    crea_cubo(0, 0, 0, inner_L, inner_B, H_tot, color='blue', opacity=0.1, name="Cassetta", showlegend=True)
+    crea_cubo(0, 0, 0, inner_L, inner_B, H_tot, color='blue', opacity=0.1, name="Kiste", showlegend=True)
 
     # Ringe
     count = 1
@@ -139,7 +139,7 @@ def zeichne_kiste_plotly(cfg, ring_name=""):
 
     # Estensione
     if uses_ext:
-        crea_cubo(0, 0, inner_H, inner_L, inner_B, EXT_HEIGHT, color='lightgray', opacity=0.3, name="Estensione", showlegend=True)
+        crea_cubo(0, 0, inner_H, inner_L, inner_B, EXT_HEIGHT, color='lightgray', opacity=0.3, name="Extension", showlegend=True)
 
     fig.update_layout(
         scene=dict(
