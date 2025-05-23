@@ -6,7 +6,7 @@ import random
 # --- Konfiguration ---
 KISTE = (567, 366, 315)
 RAND = 5
-ABSTAND = 10
+ABSTAND = 30
 EXT_HEIGHT = 200
 
 RINGE_DATEN = {
