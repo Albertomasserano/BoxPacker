@@ -7,7 +7,7 @@ import random
 KISTE = (567, 366, 315)
 RAND = 5
 ABSTAND = 30
-EXT_HEIGHT = 200
+EXT_HEIGHT = 150
 
 RINGE_DATEN = {
     "256W7225-1": (215.83, 36.1),
