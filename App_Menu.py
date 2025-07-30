@@ -46,21 +46,26 @@ def innere_maße(kiste, rand):
 
 def optimiere_achse(kiste, teil, rand, abstand, achse):
     inner_L, inner_B, inner_H = innere_maße(kiste, rand)
-    p1, p2, ps = teil
-    best = {'maße': (0,0,0), 'reihen': (0,0,0), 'gesamt': 0, 'uses_ext': False, 'H_tot': inner_H}
+    p1, p2, ps = teil  # p1 = diametro, p2 = diametro, ps = spessore
+    best = {'maße': (0, 0, 0), 'reihen': (0, 0, 0), 'gesamt': 0, 'uses_ext': False, 'H_tot': inner_H}
+
     for dims in [(p1, p2), (p2, p1)]:
-        if achse == 'Z':
-            continue
-        elif achse == 'X':
+        if achse == 'X':
             dx, dy, dz = ps, dims[0], dims[1]
-        else:
+        elif achse == 'Y':
             dx, dy, dz = dims[0], ps, dims[1]
+        elif achse == 'Z':  # Nuovo caso per Z
+            dx, dy, dz = dims[0], dims[1], ps
+
         uses_ext = dz > inner_H
         H_tot = inner_H + (EXT_HEIGHT if uses_ext else 0)
+
         nx = math.floor((inner_L + abstand) / (dx + abstand))
         ny = math.floor((inner_B + abstand) / (dy + abstand))
-        nz = 1
+        nz = math.floor((H_tot + abstand) / (dz + abstand))
+
         total = nx * ny * nz
+
         if total > best['gesamt']:
             best = {
                 'maße': (dx, dy, dz),
@@ -71,6 +76,7 @@ def optimiere_achse(kiste, teil, rand, abstand, achse):
                 'achse': achse
             }
     return best
+
 
 def berechne_alle_konfigurationen(teil):
     return [optimiere_achse(KISTE, teil, RAND, ABSTAND, ax) for ax in ('X', 'Y')]
