@@ -46,26 +46,21 @@ def innere_maße(kiste, rand):
 
 def optimiere_achse(kiste, teil, rand, abstand, achse):
     inner_L, inner_B, inner_H = innere_maße(kiste, rand)
-    p1, p2, ps = teil  # p1 = diametro, p2 = diametro, ps = spessore
-    best = {'maße': (0, 0, 0), 'reihen': (0, 0, 0), 'gesamt': 0, 'uses_ext': False, 'H_tot': inner_H}
-
+    p1, p2, ps = teil
+    best = {'maße': (0,0,0), 'reihen': (0,0,0), 'gesamt': 0, 'uses_ext': False, 'H_tot': inner_H}
     for dims in [(p1, p2), (p2, p1)]:
-        if achse == 'X':
+        if achse == 'Z':
+            continue
+        elif achse == 'X':
             dx, dy, dz = ps, dims[0], dims[1]
-        elif achse == 'Y':
+        else:
             dx, dy, dz = dims[0], ps, dims[1]
-        elif achse == 'Z':  # Nuovo caso per Z
-            dx, dy, dz = dims[0], dims[1], ps
-
         uses_ext = dz > inner_H
         H_tot = inner_H + (EXT_HEIGHT if uses_ext else 0)
-
         nx = math.floor((inner_L + abstand) / (dx + abstand))
         ny = math.floor((inner_B + abstand) / (dy + abstand))
-        nz = math.floor((H_tot + abstand) / (dz + abstand))
-
+        nz = 1
         total = nx * ny * nz
-
         if total > best['gesamt']:
             best = {
                 'maße': (dx, dy, dz),
@@ -77,9 +72,9 @@ def optimiere_achse(kiste, teil, rand, abstand, achse):
             }
     return best
 
-
-def berechne_alle_konfigurationen(teil):
-    return [optimiere_achse(KISTE, teil, RAND, ABSTAND, ax) for ax in ('X', 'Y', 'Z')]
+def berechne_beste_konfiguration(teil):
+    konfigs = [optimiere_achse(KISTE, teil, RAND, ABSTAND, ax) for ax in ('X','Y')]
+    return max(konfigs, key=lambda x: x['gesamt'])
 
 def zeichne_kiste_plotly(cfg, ring_name=""):
     inner_L, inner_B, inner_H = innere_maße(KISTE, RAND)
@@ -170,31 +165,29 @@ with st.container():
 
 if ring:
     d, h = RINGE_DATEN[ring]
-    alle_cfgs = berechne_alle_konfigurationen((d, d, h))
+    best_cfg = berechne_beste_konfiguration((d, d, h))
+    fig = zeichne_kiste_plotly(best_cfg, ring)
 
-    st.subheader("Alle möglichen Ausrichtungen")
+    # Calcola legenda testuale
+    nx, ny, _ = best_cfg['reihen']
+    dx, dy, dz = best_cfg['maße']
+    gesamt = best_cfg['gesamt']
+    sep_kurz = max(0, ny + 1)
+    sep_lang = max(0, nx + 1)
+    achse = best_cfg['achse']
+    axis_label = f"Ausrichtung: {'X' if achse == 'X' else 'Y'}-Achse"
 
-    # Mostra in due colonne per migliore layout
-    col1, col2 = st.columns(2)
+    titel = (
+        f"**{ring}**\n\n"
+        f"{axis_label}  \n"
+        f"Durchmesser: **{dx:.1f} mm**, Dicke: **{dz:.1f} mm**  \n"
+        f"Reihen: X = **{nx}**, Y = **{ny}**  \n"
+        f"**{gesamt} Ringe insgesamt**  \n"
+        f"Kurztrenner: **{sep_lang}**, Langtrenner: **{sep_kurz}**"
+    )
+    st.markdown(titel)
 
-    for idx, cfg in enumerate(alle_cfgs):
-        fig = zeichne_kiste_plotly(cfg, ring)
-        nx, ny, nz = cfg['reihen']
-        dx, dy, dz = cfg['maße']
-        gesamt = cfg['gesamt']
-        achse = cfg['achse']
+    if best_cfg['uses_ext']:
+        st.info("⚠️ Zusätzliche Höhe wird benötigt (EXT_HEIGHT)!")
 
-        details = (
-            f"### Ausrichtung: {achse}-Achse\n"
-            f"**{ring}**  \n"
-            f"Maße: {dx:.1f} × {dy:.1f} × {dz:.1f} mm  \n"
-            f"Reihen: X={nx}, Y={ny}, Z={nz}  \n"
-            f"**{gesamt} Ringe insgesamt**"
-        )
-
-        target_col = col1 if idx % 2 == 0 else col2
-        target_col.markdown(details)
-        if cfg['uses_ext']:
-            target_col.info("⚠️ Zusätzliche Höhe wird benötigt (EXT_HEIGHT)!")
-        target_col.plotly_chart(fig, use_container_width=True)
-
+    st.plotly_chart(fig, use_container_width=True)
