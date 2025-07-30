@@ -79,7 +79,7 @@ def optimiere_achse(kiste, teil, rand, abstand, achse):
 
 
 def berechne_alle_konfigurationen(teil):
-    return [optimiere_achse(KISTE, teil, RAND, ABSTAND, ax) for ax in ('X', 'Y')]
+    return [optimiere_achse(KISTE, teil, RAND, ABSTAND, ax) for ax in ('X', 'Y', 'Z')]
 
 def zeichne_kiste_plotly(cfg, ring_name=""):
     inner_L, inner_B, inner_H = innere_maße(KISTE, RAND)
