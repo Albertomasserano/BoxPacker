@@ -172,25 +172,29 @@ if ring:
     d, h = RINGE_DATEN[ring]
     alle_cfgs = berechne_alle_konfigurationen((d, d, h))
 
-    # Mostra tutte le configurazioni trovate
-    for cfg in alle_cfgs:
+    st.subheader("Alle möglichen Ausrichtungen")
+
+    # Mostra in due colonne per migliore layout
+    col1, col2 = st.columns(2)
+
+    for idx, cfg in enumerate(alle_cfgs):
         fig = zeichne_kiste_plotly(cfg, ring)
-        nx, ny, _ = cfg['reihen']
+        nx, ny, nz = cfg['reihen']
         dx, dy, dz = cfg['maße']
         gesamt = cfg['gesamt']
         achse = cfg['achse']
-        axis_label = f"Ausrichtung: {achse}-Achse"
 
-        titel = (
-            f"### {axis_label}\n"
+        details = (
+            f"### Ausrichtung: {achse}-Achse\n"
             f"**{ring}**  \n"
-            f"Durchmesser: **{dx:.1f} mm**, Dicke: **{dz:.1f} mm**  \n"
-            f"Reihen: X = **{nx}**, Y = **{ny}**  \n"
+            f"Maße: {dx:.1f} × {dy:.1f} × {dz:.1f} mm  \n"
+            f"Reihen: X={nx}, Y={ny}, Z={nz}  \n"
             f"**{gesamt} Ringe insgesamt**"
         )
 
-        st.markdown(titel)
+        target_col = col1 if idx % 2 == 0 else col2
+        target_col.markdown(details)
         if cfg['uses_ext']:
-            st.info("⚠️ Zusätzliche Höhe wird benötigt (EXT_HEIGHT)!")
+            target_col.info("⚠️ Zusätzliche Höhe wird benötigt (EXT_HEIGHT)!")
+        target_col.plotly_chart(fig, use_container_width=True)
 
-        st.plotly_chart(fig, use_container_width=True)
