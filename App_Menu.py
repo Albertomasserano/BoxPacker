@@ -72,9 +72,8 @@ def optimiere_achse(kiste, teil, rand, abstand, achse):
             }
     return best
 
-def berechne_beste_konfiguration(teil):
-    konfigs = [optimiere_achse(KISTE, teil, RAND, ABSTAND, ax) for ax in ('X','Y')]
-    return max(konfigs, key=lambda x: x['gesamt'])
+def berechne_alle_konfigurationen(teil):
+    return [optimiere_achse(KISTE, teil, RAND, ABSTAND, ax) for ax in ('X', 'Y')]
 
 def zeichne_kiste_plotly(cfg, ring_name=""):
     inner_L, inner_B, inner_H = innere_maße(KISTE, RAND)
@@ -165,8 +164,30 @@ with st.container():
 
 if ring:
     d, h = RINGE_DATEN[ring]
-    best_cfg = berechne_beste_konfiguration((d, d, h))
-    fig = zeichne_kiste_plotly(best_cfg, ring)
+alle_cfgs = berechne_alle_konfigurationen((d, d, h))
+
+# Mostra tutte le configurazioni
+for cfg in alle_cfgs:
+    fig = zeichne_kiste_plotly(cfg, ring)
+    nx, ny, _ = cfg['reihen']
+    dx, dy, dz = cfg['maße']
+    gesamt = cfg['gesamt']
+    achse = cfg['achse']
+    axis_label = f"Ausrichtung: {'X' if achse == 'X' else 'Y'}-Achse"
+
+    titel = (
+        f"### {axis_label}\n"
+        f"**{ring}**  \n"
+        f"Durchmesser: **{dx:.1f} mm**, Dicke: **{dz:.1f} mm**  \n"
+        f"Reihen: X = **{nx}**, Y = **{ny}**  \n"
+        f"**{gesamt} Ringe insgesamt**"
+    )
+
+    st.markdown(titel)
+    if cfg['uses_ext']:
+        st.info("⚠️ Zusätzliche Höhe wird benötigt (EXT_HEIGHT)!")
+
+    st.plotly_chart(fig, use_container_width=True)
 
     # Calcola legenda testuale
     nx, ny, _ = best_cfg['reihen']
