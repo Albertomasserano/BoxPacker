@@ -164,51 +164,27 @@ with st.container():
 
 if ring:
     d, h = RINGE_DATEN[ring]
-alle_cfgs = berechne_alle_konfigurationen((d, d, h))
+    alle_cfgs = berechne_alle_konfigurationen((d, d, h))
 
-# Mostra tutte le configurazioni
-for cfg in alle_cfgs:
-    fig = zeichne_kiste_plotly(cfg, ring)
-    nx, ny, _ = cfg['reihen']
-    dx, dy, dz = cfg['maße']
-    gesamt = cfg['gesamt']
-    achse = cfg['achse']
-    axis_label = f"Ausrichtung: {'X' if achse == 'X' else 'Y'}-Achse"
+    # Mostra tutte le configurazioni trovate
+    for cfg in alle_cfgs:
+        fig = zeichne_kiste_plotly(cfg, ring)
+        nx, ny, _ = cfg['reihen']
+        dx, dy, dz = cfg['maße']
+        gesamt = cfg['gesamt']
+        achse = cfg['achse']
+        axis_label = f"Ausrichtung: {achse}-Achse"
 
-    titel = (
-        f"### {axis_label}\n"
-        f"**{ring}**  \n"
-        f"Durchmesser: **{dx:.1f} mm**, Dicke: **{dz:.1f} mm**  \n"
-        f"Reihen: X = **{nx}**, Y = **{ny}**  \n"
-        f"**{gesamt} Ringe insgesamt**"
-    )
+        titel = (
+            f"### {axis_label}\n"
+            f"**{ring}**  \n"
+            f"Durchmesser: **{dx:.1f} mm**, Dicke: **{dz:.1f} mm**  \n"
+            f"Reihen: X = **{nx}**, Y = **{ny}**  \n"
+            f"**{gesamt} Ringe insgesamt**"
+        )
 
-    st.markdown(titel)
-    if cfg['uses_ext']:
-        st.info("⚠️ Zusätzliche Höhe wird benötigt (EXT_HEIGHT)!")
+        st.markdown(titel)
+        if cfg['uses_ext']:
+            st.info("⚠️ Zusätzliche Höhe wird benötigt (EXT_HEIGHT)!")
 
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Calcola legenda testuale
-    nx, ny, _ = best_cfg['reihen']
-    dx, dy, dz = best_cfg['maße']
-    gesamt = best_cfg['gesamt']
-    sep_kurz = max(0, ny + 1)
-    sep_lang = max(0, nx + 1)
-    achse = best_cfg['achse']
-    axis_label = f"Ausrichtung: {'X' if achse == 'X' else 'Y'}-Achse"
-
-    titel = (
-        f"**{ring}**\n\n"
-        f"{axis_label}  \n"
-        f"Durchmesser: **{dx:.1f} mm**, Dicke: **{dz:.1f} mm**  \n"
-        f"Reihen: X = **{nx}**, Y = **{ny}**  \n"
-        f"**{gesamt} Ringe insgesamt**  \n"
-        f"Kurztrenner: **{sep_lang}**, Langtrenner: **{sep_kurz}**"
-    )
-    st.markdown(titel)
-
-    if best_cfg['uses_ext']:
-        st.info("⚠️ Zusätzliche Höhe wird benötigt (EXT_HEIGHT)!")
-
-    st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
